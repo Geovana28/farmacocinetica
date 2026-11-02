@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pharmacokinetics Multi-Dose Simulator — Plasma drug concentration, therapeutic window, clearance, and half-life modeling.">
+    <title>Pharmacokinetics Simulator | Multi-Dose & Therapeutic Window</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts & Chart.js -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-badge">💊 PK/PD</div>
+                <div class="header-title-group">
+                    <h1>Pharmacokinetics Simulator</h1>
+                    <p class="subtitle">Multi-Dose Plasma Concentration & Therapeutic Window Engine</p>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="badge badge-pulse">1-Compartment Model</span>
+                <span class="badge badge-accent">Oral / IV Routes</span>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <!-- Sidebar Controls -->
+            <aside class="sidebar">
+                <!-- Drug Presets -->
+                <div class="control-card">
+                    <h3><span class="card-icon">🧪</span> Drug Presets</h3>
+                    <div class="preset-pills">
+                        <button class="preset-pill active" data-drug="amoxicillin">Amoxicillin</button>
+                        <button class="preset-pill" data-drug="paracetamol">Paracetamol</button>
+                        <button class="preset-pill" data-drug="ibuprofen">Ibuprofen</button>
+                        <button class="preset-pill" data-drug="theophylline">Theophylline</button>
+                        <button class="preset-pill" data-drug="gentamicin">Gentamicin (IV)</button>
+                    </div>
+                </div>
+
+                <!-- Administration Parameters -->
+                <div class="control-card">
+                    <h3><span class="card-icon">💉</span> Administration</h3>
+                    <div class="control-group">
+                        <label>Route of Administration</label>
+                        <div class="route-toggle">
+                            <button class="toggle-btn active" id="routeOral" data-route="oral">Oral (Absorption ka)</button>
+                            <button class="toggle-btn" id="routeIV" data-route="iv">IV Bolus (Direct)</button>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="label-row">
+                            <label for="dose">Dose per Intake (D)</label>
+                            <span class="value-display" id="doseVal">500 mg</span>
+                        </div>
+                        <input type="range" id="dose" min="50" max="2000" step="50" value="500">
+                    </div>
+                    <div class="control-group">
+                        <div class="label-row">
+                            <label for="interval">Dosing Interval (τ)</label>
+                            <span class="value-display" id="intervalVal">8 hours</span>
+                        </div>
+                        <input type="range" id="interval" min="2" max="24" step="1" value="8">
+                    </div>
+                    <div class="control-group">
+                        <div class="label-row">
+                            <label for="numDoses">Number of Doses</label>
+                            <span class="value-display" id="numDosesVal">6 doses</span>
+                        </div>
+                        <input type="range" id="numDoses" min="1" max="15" step="1" value="6">
+                    </div>
+                </div>
+
+                <!-- PK Biological Parameters -->
+                <div class="control-card">
+                    <h3><span class="card-icon">🧬</span> Pharmacokinetics (Body)</h3>
+                    <div class="control-group">
+                        <div class="label-row">
+                            <label for="halfLife">Elimination Half-Life (t½)</label>
+                            <span class="value-display" id="halfLifeVal">1.2 h</span>
+                        </div>
+                        <input type="range" id="halfLife" min="0.5" max="30" step="0.1" value="1.2">
+                    </div>
+                    <div class="control-group">
+                        <div class="label-row">
+                            <label for="vd">Vol. of Distribution (Vd)</label>
+                            <span class="value-display" id="vdVal">20 L</span>
+                        </div>
+                        <input type="range" id="vd" min="5" max="200" step="5" value="20">
+                    </div>
+                    <div class="control-group" id="kaGroup">
+                        <div class="label-row">
+                            <label for="ka">Absorption Rate (ka)</label>
+                            <span class="value-display" id="kaVal">1.5 /h</span>
+                        </div>
+                        <input type="range" id="ka" min="0.1" max="4.0" step="0.1" value="1.5">
+                    </div>
+                    <div class="control-group">
+                        <div class="label-row">
+                            <label for="bioavail">Bioavailability (F)</label>
+                            <span class="value-display" id="bioavailVal">90%</span>
+                        </div>
+                        <input type="range" id="bioavail" min="20" max="100" step="5" value="90">
+                    </div>
+                </div>
+
+                <!-- Safety Windows -->
+                <div class="control-card">
+                    <h3><span class="card-icon">🎯</span> Therapeutic Window</h3>
+                    <div class="control-group">
+                        <div class="label-row">
+                            <label for="mec">Min. Effective Conc. (MEC)</label>
+                            <span class="value-display" id="mecVal">4.0 mg/L</span>
+                        </div>
+                        <input type="range" id="mec" min="0.5" max="50" step="0.5" value="4.0">
+                    </div>
+                    <div class="control-group">
+                        <div class="label-row">
+                            <label for="mtc">Min. Toxic Conc. (MTC)</label>
+                            <span class="value-display" id="mtcVal">25.0 mg/L</span>
+                        </div>
+                        <input type="range" id="mtc" min="2" max="100" step="1" value="25.0">
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Dashboard Analytics -->
+            <section class="dashboard">
+                <!-- Status Banner -->
+                <div class="status-banner safe" id="statusBanner">
+                    <div class="status-icon" id="statusIcon">🛡️</div>
+                    <div class="status-content">
+                        <h4 id="statusTitle">Optimal Therapeutic Regimen</h4>
+                        <p id="statusDesc">Steady-state concentrations remain safely between MEC and MTC thresholds.</p>
+                    </div>
+                </div>
+
+                <!-- KPI Metrics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Peak Concentration (Cmax)</div>
+                        <div class="stat-value" id="kpiCmax">18.4 <span class="unit">mg/L</span></div>
+                        <div class="stat-sub" id="kpiCmaxStatus">Under toxic limit</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Trough Concentration (Cmin)</div>
+                        <div class="stat-value" id="kpiCmin">5.2 <span class="unit">mg/L</span></div>
+                        <div class="stat-sub" id="kpiCminStatus">Above therapeutic minimum</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Steady State Level (Css avg)</div>
+                        <div class="stat-value" id="kpiCss">10.8 <span class="unit">mg/L</span></div>
+                        <div class="stat-sub">Target plateau range</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Time to Steady-State</div>
+                        <div class="stat-value" id="kpiTss">6.0 <span class="unit">hours</span></div>
+                        <div class="stat-sub">~4-5 half-lives (t½)</div>
+                    </div>
+                </div>
+
+                <!-- Main Chart -->
+                <div class="chart-container-card">
+                    <div class="chart-header">
+                        <div>
+                            <h3>Plasma Drug Concentration Curve</h3>
+                            <p class="chart-subtitle">Multi-dose accumulation kinetics with real-time zone detection</p>
+                        </div>
+                        <div class="chart-legend-custom">
+                            <span class="dot dot-toxic"></span> Toxic Zone (> MTC)
+                            <span class="dot dot-therapeutic"></span> Therapeutic Window
+                            <span class="dot dot-sub"></span> Sub-therapeutic (< MEC)
+                        </div>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <canvas id="pkChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Secondary Visuals: Elimination Rate & Accumulation Metrics -->
+                <div class="bottom-grid">
+                    <div class="info-card">
+                        <h4>🧮 Mathematical Model</h4>
+                        <p class="formula-intro">One-compartment open model with first-order elimination:</p>
+                        <div class="formula-box" id="formulaDisplay">
+                            $$C(t) = \sum_{k=0}^{n-1} \frac{F \cdot D \cdot k_a}{V_d (k_a - k_e)} \left( e^{-k_e(t - k\tau)} - e^{-k_a(t - k\tau)} \right)$$
+                        </div>
+                        <ul class="formula-legend">
+                            <li><strong>k_e (elimination constant):</strong> <span id="valKe">0.578 /h</span></li>
+                            <li><strong>Clearance (CL):</strong> <span id="valCl">11.55 L/h</span></li>
+                            <li><strong>Accumulation Index (R):</strong> <span id="valR">1.01x</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="info-card">
+                        <h4>💡 Clinical Interpretation</h4>
+                        <div class="clinical-box" id="clinicalInsight">
+                            Dosing interval allows complete clearance between doses. Low accumulation risk.
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Time in Therapeutic Range</span>
+                                <span id="timeInRangeVal">78%</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" id="timeInRangeBar" style="width: 78%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
