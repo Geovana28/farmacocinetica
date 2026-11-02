@@ -4,8 +4,6 @@ Simulador de concentração plasmática multi-dose com janela terapêutica, pres
 
 ## 🚀 Funcionalidades
 
-- **Variabilidade Interindividual por Monte Carlo** — Simulação com distribuição log-normal para Clearance ($CL$) e Volume de Distribuição ($V_d$) com bandas de confiança 90%.
-- **Estimativa Inversa de Parâmetros (Bayesian Parameter Fitting)** — Recuperação de parâmetros biológicos individuais a partir de coletas plasmáticas esparsas com ruído experimental.
 - **5 Presets de Medicamentos** — Amoxicilina, Paracetamol, Ibuprofeno, Teofilina, Gentamicina (IV)
 - **Vias de Administração** — Oral (absorção $k_a$) e IV Bolus (direto)
 - **Janela Terapêutica** — MEC (mínima eficaz) e MTC (mínima tóxica) dinâmicas
@@ -17,13 +15,15 @@ Simulador de concentração plasmática multi-dose com janela terapêutica, pres
 
 $$C(t) = \sum_{k=0}^{N-1} \frac{F \cdot D \cdot k_a}{V_d (k_a - k_e)} \left( e^{-k_e (t - k\tau)} - e^{-k_a (t - k\tau)} \right) \cdot \mathbb{I}(t \ge k\tau)$$
 
-### 2. Variabilidade Inter-Individual Estocástica (Monte Carlo PK)
+> 🗺️ **Roadmap (ainda não implementado no simulador):** as seções 2 e 3 abaixo descrevem extensões planejadas. O código atual implementa apenas o modelo determinístico da seção 1.
+
+### 2. [Roadmap] Variabilidade Inter-Individual Estocástica (Monte Carlo PK)
 
 $$CL_i = \theta_{CL} \cdot \exp(\eta_i), \quad \eta_i \sim \mathcal{N}(0, \, \omega_{CL}^2)$$
 
 Gera as bandas de incerteza da concentração plasmática na população de pacientes, calculando a probabilidade de escape terapêutico ou toxicidade renal/hepática.
 
-### 3. Problema Inverso (Ajuste Não-Linear por Mínimos Quadrados / MAP Bayesiano)
+### 3. [Roadmap] Problema Inverso (Ajuste Não-Linear por Mínimos Quadrados / MAP Bayesiano)
 
 $$\hat{\theta} = \arg\min_{\theta} \sum_{j=1}^{M} \left( \frac{C_{\text{obs}}(t_j) - C_{\text{pred}}(t_j; \theta)}{\sigma_j} \right)^2 + (\theta - \theta_{\text{prior}})' \Omega^{-1} (\theta - \theta_{\text{prior}})$$
 
